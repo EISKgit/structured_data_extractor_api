@@ -39,18 +39,27 @@ class StructuredExtractorAPIView(APIView):
         document_file = serializer.validated_data['document']
         field_string = serializer.validated_data['fields']
 
-        # Log validated request details
+        # Initialize both variables for use outside the try block
+        temp_path = None
+        file_descriptor = None
+
         logger.info(
             f"Starting extraction for file: {document_file.name}, requested fields: '{field_string}'")
 
         # langchain orchestraction
 
         try:
-            # save the uploaded file temporarily to disk(langchain PyPDF loader often need a path)
-            with tempfile.TemporaryFile(delete=False) as tmp_file:
+
+            # Use mkstemp to securely create a temporary file and get its path.
+            # mkstemp returns a tuple: (file_descriptor, path)
+            file_descriptor, temp_path = tempfile.mkstemp(suffix=".pdf")
+            logger.debug(f"Temporary file created at: {temp_path}")
+
+            # Write the uploaded file chunks to the temporary file path.
+            # os.fdopen is used to get a file object from the file descriptor (fd).
+            with os.fdopen(file_descriptor, 'wb') as tmp_file:
                 for chunk in document_file.chunks():
                     tmp_file.write(chunk)
-                temp_path = tmp_file.name
             logger.debug(f"Temporary file created at: {temp_path}")
 
             # load and parse the PDF text
