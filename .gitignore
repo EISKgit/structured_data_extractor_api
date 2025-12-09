@@ -1,6 +1,7 @@
 # ----------------------------------------
 # VIRTUAL ENVIRONMENTS & SECRETS
 # ----------------------------------------
+
 # Virtual environment folder created by 'python -m venv venv'
 venv/
 # The .env file contains sensitive API keys (e.g., OPENAI_API_KEY)
