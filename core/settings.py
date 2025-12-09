@@ -11,9 +11,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-r14shmzh0xrlrchvf6j=wvk(^%6!ai!#owa8@+6=&17!1)j-kd"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# settings.py
+
+# The official deployment host
+RENDER_EXTERNAL_HOSTNAME = 'structured-data-extractor-api-mh8h.onrender.com'
+
+ALLOWED_HOSTS = [
+    # Allows all subdomains ending in .onrender.com (good for staging)
+    '.onrender.com',
+    RENDER_EXTERNAL_HOSTNAME,
+    '127.0.0.1',      # Local development host
+    'localhost',      # Local development host
+]
+
+# You could also use this simple approach for quick fixes:
+# ALLOWED_HOSTS = ['structured-data-extractor-api-mh8h.onrender.com']
 
 
 # Application definition
