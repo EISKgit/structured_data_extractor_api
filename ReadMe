@@ -1,0 +1,130 @@
+##  Structured Document Data Extractor API
+
+This project implements a robust API for extracting structured data from uploaded PDF documents using a dynamic schema defined at runtime. It leverages **Django REST Framework (DRF)** for handling file uploads and **LangChain** with OpenAI's models for reliable, structured data extraction.
+
+###  Key Features
+
+  * **Dynamic Schema Generation:** Users define required output fields via a comma-separated string (e.g., `"Name, Address, Date"`), which is converted into a Pydantic schema on the fly.
+  * **Structured Output:** Uses LangChain's `with_structured_output` to force the LLM to return JSON that strictly adheres to the dynamic schema.
+  * **PDF Processing:** Handles PDF file uploads, extracts text content, and cleans up temporary files.
+  * **Error Handling:** Implements robust error handling and critical temporary file cleanup.
+
+###  Technologies Used
+
+| Component | Technology | Role |
+| :--- | :--- | :--- |
+| API/Backend | Django, Django REST Framework (DRF) | Routing, File Uploads, Serialization |
+| AI Core | LangChain, `langchain-groq` | Orchestrates LLM calls, Handles Structured Output |
+| Data Schema | Pydantic | Defines the required JSON structure dynamically |
+| PDF Handling | `pypdf` (`PyPDFLoader`) | Extracts text from uploaded PDF files |
+| Environment | `python-dotenv` | Loads API keys securely |
+
+###  Getting Started
+
+#### 1\. Project Setup and Dependencies
+
+```bash
+# Create project directory and virtual environment
+mkdir structured_extractor
+cd structured_extractor
+python -m venv venv
+source venv/bin/activate  # Use `venv\Scripts\activate` on Windows
+
+# Install core Django/DRF libraries
+pip install django djangorestframework
+
+# Install AI/PDF libraries
+pip install langchain-openai pydantic python-dotenv pypdf
+
+# Initialize Django Project
+django-admin startproject core .
+python manage.py startapp extractor
+```
+
+#### 2\. Configuration
+
+**A. API Key**
+Create a file named `.env` in the project root to store your Groq API key.
+
+```ini
+# .env
+GROQ_API_KEY="YOUR_GROQ_KEY_HERE"
+```
+
+**B. Django Settings**
+In `core/settings.py`, add the required applications:
+
+```python
+# core/settings.py
+INSTALLED_APPS = [
+    # ... other apps
+    'rest_framework',
+    'extractor',
+]
+```
+
+**C. URL Configuration**
+Ensure the main project URLs include the API endpoint:
+
+```python
+# core/urls.py
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/v1/', include('extractor.urls')), # API Endpoint
+]
+```
+
+### 3\. API Endpoint
+
+The extractor is exposed as a single `POST` endpoint.
+
+  * **Endpoint:** `/api/v1/extract/`
+  * **Method:** `POST`
+  * **Content-Type:** `multipart/form-data`
+
+#### Request Body (form-data)
+
+| Key | Type | Description |
+| :--- | :--- | :--- |
+| `document` | `File` | The PDF file to be processed. |
+| `fields` | `Text` | Comma-separated names of the fields to extract (e.g., `"Invoice ID, Customer Name, Total Amount"`). |
+
+#### Successful Response (HTTP 200)
+
+The response is a JSON object matching the requested fields. Note that field names are converted to snake\_case. Missing fields are explicitly set to `null` by the LLM, as per the system prompt instruction.
+
+```json
+{
+    "invoice_id": "INV-2025-101",
+    "customer_name": "Acme Corp.",
+    "total_amount": "450.75 USD",
+    "missing_field": null
+}
+```
+
+### 4\. Running the Project
+
+```bash
+# Apply migrations (optional for this project, but good practice)
+python manage.py migrate
+
+# Start the development server
+python manage.py runserver
+```
+
+###  How to Test
+
+Use a tool like **Postman** or **curl** to send a `POST` request to `http://127.0.0.1:8000/api/v1/extract/`.
+
+1.  Set the request type to `POST`.
+2.  Set the body type to **`form-data`**.
+3.  Add the two required keys (`document` and `fields`).
+
+-----
+
+###  Critical Note on File Handling
+
+The view logic in `extractor/views.py` temporarily saves the uploaded PDF file to disk to satisfy the `PyPDFLoader` dependency. A **`finally`** block is implemented to ensure the temporary file is **always deleted** after processing, regardless of success or failure. This is essential for preventing disk space issues.

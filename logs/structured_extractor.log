@@ -1,0 +1,9 @@
+INFO 2025-12-09 15:11:45,591 autoreload 22600 19448 Watching for file changes with StatReloader
+INFO 2025-12-09 15:11:51,143 autoreload 22600 19448 D:\Python3_venv\projects\structured_extractor\core\settings.py changed, reloading.
+INFO 2025-12-09 15:11:52,147 autoreload 2344 16188 Watching for file changes with StatReloader
+INFO 2025-12-09 15:12:18,875 views 2344 22372 Received extraction request from user: Anonymous
+INFO 2025-12-09 15:12:18,882 views 2344 22372 Starting extraction for file: Inayathulla_SK_Resume_2025.pdf, requested fields: 'Name, skills, projects, experience'
+INFO 2025-12-09 15:12:19,632 lc_service 2344 22372 Initializing LangChain pipeline with schema: DocumentDataSchema
+INFO 2025-12-09 15:12:22,576 _client 2344 22372 HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+INFO 2025-12-09 15:12:22,641 views 2344 22372 Extraction complete for file: Inayathulla_SK_Resume_2025.pdf. Result keys: ['name', 'skills', 'projects', 'experience']
+INFO 2025-12-09 15:12:22,644 basehttp 2344 22372 "POST /api/v1/extract/ HTTP/1.1" 200 708
